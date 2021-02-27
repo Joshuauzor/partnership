@@ -6,8 +6,8 @@ class Auth extends CI_Controller{
     {
         parent::__construct();
         $this->load->library(array('session', 'form_validation'));
-        $this->load->helper(array('form', 'url'));
-        $this->load->model(array('User_Model'));
+        $this->load->helper(array('form', 'url', 'email_helper'));
+        $this->load->model(array('User_Model', 'Category_Model'));
         
     }
 
@@ -15,7 +15,7 @@ class Auth extends CI_Controller{
         $data['title'] = 'Partnership | Login';
         if($this->input->post()){
             // validate form
-            $this->form_validation->set_rules('email', 'Email','required|valid_email',
+            $this->form_validation->set_rules('email', 'Email','required|trim',
                 [
                         'required'      => 'You have not provided %s.',
                 ]
@@ -29,9 +29,20 @@ class Auth extends CI_Controller{
                     $confirmPass = password_verify($this->input->post('password'), $user->password);
                     if($confirmPass){
                         if($user->status == "active"){
-                            $this->session->set_userdata('user', $user);
+                            // set user session
+                            $data = [
+                                'id' => $user->id,
+                                'uniid' => $user->uniid,
+                                'name' => $user->name,
+                                'email' => $user->email,
+                                'code' => $user->code,
+                                'role' => $user->role,
+                                'isLoggedIn' => true,
+                            ];
+                            $this->session->set_userdata('user', $data);
+                
                             // Home
-                            // redirect(base_url(''))
+                            redirect(base_url('home'));
                         }
                         else{
                             $this->session->set_flashdata('error', 'Please check your mail to activate your account or contact Admin');
@@ -40,13 +51,13 @@ class Auth extends CI_Controller{
                     }
                     else{
                         // print debug message
-                        $this->session->set_flashdata('error', 'Incorrect Email and/or Password');
+                        $this->session->set_flashdata('error', 'Incorrect Code, Email and/or Password');
                         redirect(current_url());
                     }
                 }
                 else{
                      // print debug message
-                     $this->session->set_flashdata('error', 'Incorrect Email and/or Password');
+                     $this->session->set_flashdata('error', 'Incorrect Code, Email and/or Password');
                      redirect(current_url());
                 }
             }
@@ -59,6 +70,7 @@ class Auth extends CI_Controller{
 
     public function register(){
         $data['title'] = 'Partnership | Register';
+        $data['all_categories'] = $this->Category_Model->get_All();
         
         if($this->input->post()){
             // validate form
@@ -66,6 +78,8 @@ class Auth extends CI_Controller{
                 'required'      => 'Full name is required',
             ]);
             $this->form_validation->set_rules('password', 'Password', 'required');
+            $this->form_validation->set_rules('dob', 'Date Of Birth', 'required');
+            $this->form_validation->set_rules('category', 'Category', 'required');
             $this->form_validation->set_rules('email', 'Email','required|valid_email|is_unique[users.email]',
                 [
                         'required'      => 'You have not provided %s.',
@@ -73,13 +87,19 @@ class Auth extends CI_Controller{
                 ]
             );
         
-
             if($this->form_validation->run()){
+                // formalize req in the good format
                 $uniid = md5(str_shuffle('bjdshge3737gdnabhvabau3283ypspjdnaqerxnm'));
                 $hashed_pass = password_hash($this->input->post('password'), PASSWORD_DEFAULT);
-                
                 $code = 'GNP-' ."" .$this->generatePIN(1);
                 $check_code = $this->User_Model->check_code($code);
+
+                // date of birth
+                $stringarr = explode('-',$this->input->post('dob'));
+                $DYear = $stringarr[0]; 
+                $DMonth = $stringarr[1]; 
+                $DDay = $stringarr[2];
+    
                 
                 do{
                     // check if code exist
@@ -90,36 +110,28 @@ class Auth extends CI_Controller{
                             'email' => $this->input->post('email', FILTER_SANITIZE_EMAIL),
                             'uniid' => $uniid,
                             'code' => $code,
+                            'birth_day' => $DDay,
+                            'birth_month' => $DMonth,
+                            'birth_year' => $DYear,
                             'password' => $hashed_pass
                         ];
                         // check if code is in db
                         if($this->User_Model->insert($data)){
                             // send mail with activation link and code
-                            $to = $this->input->post('email');
-                            $subject = 'Account Activation';
-                            $message = '<div style="line-height: 1.5;">
-                            Dear '.$this->input->post('name', FILTER_SANITIZE_STRING).',<br>Your partnership registration was successful.<br> Kindly click the button or copy and paste the link below in a browser to verify your email address.<br>
-                             <a href="'.base_url().'user/auth/activate/'.$uniid.'" target="_blank">Click here to Activate Account</a> <a href="'.base_url().'user/auth/activate/'.$uniid.'" target="_blank"><button class="mt-1 btn btn-primary btn-lg" style="background-color: rgb(105, 105, 233); color: aliceblue; border-radius: 1em; border-width: 0;">Activate Now</button>
-                             </a>
-                             <div>Your Partnership ID is: '.$code.'</div>
-                             <div>Please keep it safe!</div>
-                             <div>Partnership program has consistently and relentlessly put the immediate needs of humanity at the fore front of it’s existence ensuring the enrichment, empowerment of lives and eradication of humanities greatest deprivation</div>
-                             <br>Best regard,<br>
-                             from us at GPU.<br>
-                            </div>';
-                            
-                            // link to change in the sendemail method
-                            $link = 'register';
-                            $successMessage = 'Account created successfully. Please check your mail to activate your account within an hour.';
+                            $receiver_name = $this->input->post('name', FILTER_SANITIZE_STRING);
+                            $receiver_email = $this->input->post('email', FILTER_SANITIZE_EMAIL);
+                            $receiver_code = $code;
 
+                            #load helper
+                            $send_mail = register_message($receiver_email, $uniid ,$receiver_code, $receiver_name);
                             // Check the sendMail method and add defined parameters
-                            if($this->sendMail($to , $subject ,$message, $link, $successMessage)){
-                                $this->session->set_flashdata('success', 'success!');
-                                redirect(base_url('user/auth/register'));
+                            if($send_mail){
+                                $this->session->set_flashdata('success', 'A verification link has been sent to you. Please verify your account within 2 hours!');
+                                redirect(base_url('register'));
                             }
                             else{
                                 $this->session->set_flashdata('error', 'An Error Occured! Try Again!');
-                                redirect(base_url('user/auth/register'));
+                                redirect(base_url('register'));
                             }
                         }
                         else{
@@ -142,50 +154,6 @@ class Auth extends CI_Controller{
 
         $this->load->view('user_view/auth/register', $data);
     }
-
-
-
-    //--------------------------------------------------------------------
-
-    public function sendMail($receiver_email, $newSubject ,$newMessage, $link, $successMessage){
-        $to = $receiver_email;
-        $subject = $newSubject;
-        $message = $newMessage;
-
-        // mail sending protocol
-        $config = array();
-        $config['useragent'] = "CodeIgniter";
-        $config['protocol'] = "smtp";
-        $config['smtp_host'] = "ssl://smtp.gmail.com";
-        $config['smtp_port'] = "465";
-        $config['mailtype'] = 'html';
-        $config['smtp_user'] = 'Zealtechnologies10@gmail.com';
-        $config['smtp_pass'] = 'Zealtechnologies20';
-        $config['charset']  = 'utf-8';
-        $config['newline']  = "\r\n";
-        $config['wordwrap'] = TRUE;
-
-        $this->load->library('email');
-
-        $this->email->initialize($config);
-
-        $this->email->from('Zealtechnologies10@gmail.com', 'Info');
-        $this->email->to($to);
-        $this->email->subject($subject);
-        $this->email->message($message);
-
-        if($this->email->send()){
-            $this->session->set_flashdata('success', $successMessage);
-            redirect(base_url('user/auth/').$link);
-            return true;
-        }
-        else{
-            // $data = $this->email->print_debugger(['headers']);
-            // print_r($data);
-            return false;
-        }
-    }
-
 
     //--------------------------------------------------------------------
 
@@ -254,25 +222,15 @@ class Auth extends CI_Controller{
                     $code = $user->code;
                     // update user
                     if($this->User_Model->updateByUniid($uniid, $data)){
-                        
-                        $to = $this->input->post('email');
-                        $subject = 'Password Reset';
-                        $message = '<div style="line-height: 1.5;">
-                        Dear '.$this->input->post('name', FILTER_SANITIZE_STRING).',<br>A password request link has been sent to you, if this activity was not done by you please contact the admin to secure your account.<br>
-                            <a href="'.base_url().'user/auth/resetPass/'.$uniid.'" target="_blank">Click here to Reset Your Password</a> <a href="'.base_url().'user/auth/resetPass/'.$uniid.'" target="_blank"><button class="mt-1 btn btn-primary btn-lg" style="background-color: rgb(105, 105, 233); color: aliceblue; border-radius: 1em; border-width: 0;">Reset Password</button>
-                            </a>
-                            <div>Your Partnership ID is: '.$code.'</div>
-                            <div>Please keep it safe!</div>
-                            <br>Best regard,<br>
-                            from us at GPU.<br>
-                        </div>';
-                        
-                        // link to redirect after success email
-                        $link = 'forgotPass';
-                        $successMessage = 'A password reset link has been sent to your email. Please verify within 15mins';
 
                         // Check the sendMail method and add defined parameters
-                        if($this->sendMail($to , $subject ,$message, $link, $successMessage)){
+                            $receiver_name = $this->input->post('name', FILTER_SANITIZE_STRING);
+                            $receiver_email = $this->input->post('email', FILTER_SANITIZE_EMAIL);
+                            $receiver_code = $code;
+
+                            #load helper
+                            $send_mail = register_message($receiver_email, $uniid ,$receiver_code, $receiver_name);
+                        if($send_mail){
                             $this->session->set_flashdata('success', 'A password reset link has been sent to your email. Please verify within 15mins');
                             redirect(current_url());
                         }
@@ -337,7 +295,7 @@ class Auth extends CI_Controller{
                     }
                 }
                 else{
-                    $data['error'] = 'Reset link was  expired!!'; //use data to avoid page reload but maintain logic in the view
+                    $data['error'] = 'Reset link is expired!!'; //use data to avoid page reload but maintain logic in the view
                 }
 
             }
@@ -378,9 +336,7 @@ class Auth extends CI_Controller{
         $currTime = strtotime($date);
 
         $resetTime = strtotime($updatedTime);
-        $diffTime = $currTime - $resetTime;
-
-        // var_dump($diffTime); die;
+        $diffTime = ($currTime - $resetTime)/360;
 
         if(737 > $diffTime){
 			return true;
@@ -405,6 +361,12 @@ class Auth extends CI_Controller{
     //--------------------------------------------------------------------
 
     public function logout(){
-
+        if(! $this->session->user){
+            redirect(base_url('user/auth'));
+        }
+        else{
+            $this->session->unset_userdata('user');
+            redirect(base_url('user/auth'));
+        }
     }
 }

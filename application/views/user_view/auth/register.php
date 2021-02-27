@@ -57,8 +57,23 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="email">Email</label>
-                            <input type="email" class="form-control form-control-lg" id="email" value="<?= set_value('email') ?>" name="email" placeholder="Enter your email address or username">
+                            <input type="email" class="form-control form-control-lg" id="email" value="<?= set_value('email') ?>" name="email" placeholder="Enter your email address or username" required>
                         </div>
+                        <!-- new fields -->
+                        <div class="form-group">
+                            <label class="form-label" for="name">Category</label>
+                            <select name="category" id="" class="form-control form-control-lg">
+                                <option value="" selected disabled>-- Select Category --</option>
+                                <?php foreach($all_categories as $data): ?>
+                                    <option value="<?= $data->id ?>"><?= $data->name ?></option>
+                                <?php endforeach ?>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="name">Date Of Birth</label>
+                            <input type="date" class="form-control form-control-lg" value="<?= set_value('dob') ?>" name="dob" id="name" placeholder="Enter your name" required>
+                        </div>
+                        <!-- new fields -->
                         <div class="form-group">
                             <label class="form-label" for="password">Passcode</label>
                             <div class="form-control-wrap">
@@ -84,7 +99,7 @@
                         </div> -->
                         <div class="form-group">
                             <div class="custom-control custom-control-xs custom-checkbox">
-                                <input type="checkbox" class="custom-control-input" id="checkbox">
+                                <input type="checkbox" class="custom-control-input" id="checkbox" required>
                                 <label class="custom-control-label" for="checkbox">I agree to Dashlite <a tabindex="-1" href="#">Privacy Policy</a> &amp; <a tabindex="-1" href="#"> Terms.</a></label>
                             </div>
                         </div>
@@ -92,7 +107,7 @@
                             <button class="btn btn-lg btn-primary btn-block">Register</button>
                         </div>
                     </form><!-- form -->
-                    <div class="form-note-s2 pt-4"> Already have an account ? <a href="<?= base_url('user/auth')?>"><strong>Sign in instead</strong></a>
+                    <div class="form-note-s2 pt-4"> Already have an account ? <a href="<?= base_url('login')?>"><strong>Sign in instead</strong></a>
                     </div>
                     <div class="text-center pt-4 pb-3">
                         <h6 class="overline-title overline-title-sap"><span>OR</span></h6>

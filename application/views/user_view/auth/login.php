@@ -57,7 +57,7 @@
                                 <label class="form-label" for="default-01">Email or PIN</label>
                                 <a class="link link-primary link-sm" tabindex="-1" href="#">Need Help?</a>
                             </div>
-                            <input type="email" class="form-control form-control-lg" name="email" id="default-01" placeholder="Enter your email address or username">
+                            <input type="text" class="form-control form-control-lg" name="email" id="default-01" placeholder="Enter your email address or username">
                         </div><!-- .foem-group -->
                         <div class="form-group">
                             <div class="form-label-group">
@@ -86,7 +86,7 @@
                         <li class="nav-item"><a class="nav-link" href="#">Google</a></li>
                     </ul>
                     <div class="text-center mt-5">
-                        <span class="fw-500">I don't have an account? <a href="<?= base_url('user/auth/register')?>">Try 15 days free</a></span>
+                        <span class="fw-500">I don't have an account? <a href="<?= base_url('register')?>">Try 15 days free</a></span>
                     </div>
                 </div><!-- .nk-block -->
                 <div class="nk-block nk-auth-footer">

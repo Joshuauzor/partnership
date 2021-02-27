@@ -15,7 +15,8 @@ class User_Model extends CI_Model{
     //------------------------------------------------
 
     public function check_email($data){
-        $this->db->where('email', $data);
+        $this->db->where('email', $data); 
+        $this->db->or_where('code', $data);
         return $this->db->get($this->table_name)->row();
     }
 
@@ -54,6 +55,25 @@ class User_Model extends CI_Model{
         return $this->db->update($this->table_name,$data);
     }
 
-   
+    //---------------------------------------------------
+
+    public function getOne($id){
+        $this->db->where('id', $id);
+        return $this->db->get($this->table_name)->row();
+    }
+
+    // -------------------------------------------------
+
+    public function getAllUsers(){
+        $this->db->where('role', 'user');
+        $this->db->where('status', 'active');
+        return $this->db->get($this->table_name)->result();
+    }
+
+    // ----------------------------------------------------
+
+    public function getAllAdmin(){
+
+    }
 
 }
