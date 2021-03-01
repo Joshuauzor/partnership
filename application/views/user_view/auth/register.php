@@ -55,14 +55,16 @@
                             <label class="form-label" for="name">Name</label>
                             <input type="text" class="form-control form-control-lg" value="<?= set_value('name') ?>" name="name" id="name" placeholder="Enter your name">
                         </div>
+                        <span class="small text-danger"><?= form_error('name')?></span>
                         <div class="form-group">
                             <label class="form-label" for="email">Email</label>
                             <input type="email" class="form-control form-control-lg" id="email" value="<?= set_value('email') ?>" name="email" placeholder="Enter your email address or username" required>
                         </div>
+                        <span class="small text-danger"><?= form_error('email')?></span>
                         <!-- new fields -->
                         <div class="form-group">
                             <label class="form-label" for="name">Category</label>
-                            <select name="category" id="" class="form-control form-control-lg">
+                            <select name="category" id="" class="form-control form-control-lg" required>
                                 <option value="" selected disabled>-- Select Category --</option>
                                 <?php foreach($all_categories as $data): ?>
                                     <option value="<?= $data->id ?>"><?= $data->name ?></option>
@@ -70,10 +72,20 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label class="form-label" for="address">Address</label>
+                            <input type="text" class="form-control form-control-lg" id="address" value="<?= set_value('address') ?>" name="address" placeholder="Enter your address" required>
+                        </div>
+                        <div class="form-group">
                             <label class="form-label" for="name">Date Of Birth</label>
                             <input type="date" class="form-control form-control-lg" value="<?= set_value('dob') ?>" name="dob" id="name" placeholder="Enter your name" required>
                         </div>
+                        <div class="form-group">
+                            <label class="form-label" for="name">Wedding Anniversary</label>
+                            <input type="date" class="form-control form-control-lg" value="<?= set_value('wav') ?>" name="wav" id="wav">
+                            <span class="small">Leave this field blank if none</span>
+                        </div>
                         <!-- new fields -->
+                        
                         <div class="form-group">
                             <label class="form-label" for="password">Passcode</label>
                             <div class="form-control-wrap">
@@ -84,7 +96,7 @@
                                 <!-- added for security -->
                                 <input type="hidden" name="{csrf_token}" value="{csrf_hash}">
                                 <!-- end -->
-                                <input type="password" class="form-control form-control-lg" name="password" id="password" placeholder="Enter your passcode">
+                                <input type="password" class="form-control form-control-lg" name="password" id="password" placeholder="Enter your passcode" required>
                             </div>
                         </div>
                         <!-- <div class="form-group">

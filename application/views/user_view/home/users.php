@@ -34,6 +34,15 @@
                                 </div>
                             </div>
                         </div>
+                         <!-- error message -->
+                        <?php if($this->session->flashdata('error')): ?>
+                                <div class="alert alert-danger"><?= $this->session->flashdata('error') ?></div>
+                            <?php endif  ?>
+                        <!-- success message -->
+                        <?php if($this->session->flashdata('success')): ?>
+                                <div class="alert alert-success"><?= $this->session->flashdata('success') ?></div>
+                        <?php endif  ?>
+                        <!-- ends -->
                         <div class="card card-preview">
                             <div class="card-inner">
                                 <table class="datatable-init table">
@@ -103,31 +112,28 @@
                     </a>
                 </div>
                 <div class="modal-body">
-                    <form action="#" class="form-validate is-alter">
+                    <form action="<?= base_url('user/register') ?>" method="POST" class="form-validate is-alter">
                         <div class="form-group">
                             <label class="form-label" for="full-name">Full Name</label>
                             <div class="form-control-wrap">
-                                <input type="text" class="form-control" id="full-name" required>
+                                <input type="text" class="form-control" id="name" name="name" required>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="form-label" for="email-address">Email address</label>
                             <div class="form-control-wrap">
-                                <input type="text" class="form-control" id="email-address" required>
+                                <input type="text" class="form-control" id="email-address" name="email" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label" for="phone-no">Phone No</label>
-                            <div class="form-control-wrap">
-                                <input type="text" class="form-control" id="phone-no">
-                            </div>
-                        </div>
-                        
+                            <label class="form-label" for="address">Address</label>
+                            <input type="text" class="form-control form-control-lg" id="address" name="address" value="<?= set_value('address') ?>" name="address" placeholder="Enter your address" required>
+                        </div>                        
                         <div class="form-group">
                             <label class="form-label" for="pay-amount">Category</label>
                             <div class="form-control-wrap">
                                 <div class="form-control-wrap">
-                                    <select name="" id="" class="form-control">
+                                    <select name="category" id="" class="form-control" required>
                                             <option value="" selected disabled>-- Select Category --</option>
                                         <?php foreach($all_categories as $row): ?>
                                             <option value="<?= $row->id ?>"><?= $row->name?></option>
@@ -139,14 +145,20 @@
                         <div class="form-group">
                             <label class="form-label">Date of Birth</label>
                             <div class="form-control-wrap">
-                                <input type="date" class="form-control" id="phone-no">
+                                <input type="date"  name="dob" class="form-control" id="phone-no">
                             </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label" for="name">Wedding Anniversary</label>
+                            <input type="date" class="form-control form-control-lg" value="<?= set_value('wav') ?>" name="wav" id="wav" placeholder="Enter your name">
+                            <span class="small">Leave this field blank if none</span>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Password</label>
                             <div class="form-control-wrap">
-                                <input type="text" class="form-control" id="phone-no">
+                                <input type="text" name="password" class="form-control" id="password" required>
                             </div>
+                            <span class="small">Password "12345" is recommended for user default password</span>
                         </div>
                         <div class="form-group">
                             <button type="submit" class="btn btn-lg btn-primary">Register</button>

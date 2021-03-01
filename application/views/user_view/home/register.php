@@ -5,6 +5,15 @@
     <!-- content -->
     <div class="nk-content nk-content-fluid">
         <div class="container-xl wide-lg">
+            <!-- error message -->
+            <?php if($this->session->flashdata('error')): ?>
+                    <div class="alert alert-danger"><?= $this->session->flashdata('error') ?></div>
+                <?php endif  ?>
+            <!-- success message -->
+            <?php if($this->session->flashdata('success')): ?>
+                    <div class="alert alert-success"><?= $this->session->flashdata('success') ?></div>
+            <?php endif  ?>
+            <!-- ends -->
         <?php if($this->session->user['role'] == 'super_admin'):?>
             <div class="nk-content-body">
                 <div class="components-preview wide-md mx-auto">

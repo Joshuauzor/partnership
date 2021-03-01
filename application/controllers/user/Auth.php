@@ -77,15 +77,17 @@ class Auth extends CI_Controller{
             $this->form_validation->set_rules('name', 'Name', 'required', [
                 'required'      => 'Full name is required',
             ]);
-            $this->form_validation->set_rules('password', 'Password', 'required');
-            $this->form_validation->set_rules('dob', 'Date Of Birth', 'required');
-            $this->form_validation->set_rules('category', 'Category', 'required');
             $this->form_validation->set_rules('email', 'Email','required|valid_email|is_unique[users.email]',
                 [
                         'required'      => 'You have not provided %s.',
                         'is_unique'     => 'Email already exists.'
                 ]
             );
+            $this->form_validation->set_rules('dob', 'Date Of Birth', 'required|trim|xss_clean');
+            $this->form_validation->set_rules('category', 'Category', 'required|trim|xss_clean');
+            $this->form_validation->set_rules('address', 'Address', 'required|trim|xss_clean');
+            $this->form_validation->set_rules('wav', 'Wedding', 'trim|xss_clean');
+            $this->form_validation->set_rules('password', 'Password', 'required|trim|xss_clean');      
         
             if($this->form_validation->run()){
                 // formalize req in the good format
@@ -99,6 +101,12 @@ class Auth extends CI_Controller{
                 $DYear = $stringarr[0]; 
                 $DMonth = $stringarr[1]; 
                 $DDay = $stringarr[2];
+
+                // date of wedding anniversary
+                $stringarr = explode('-',$this->input->post('wav'));
+                $WYear = $stringarr[0]; 
+                $WMonth = $stringarr[1]; 
+                $WDay = $stringarr[2];
     
                 
                 do{
@@ -113,6 +121,10 @@ class Auth extends CI_Controller{
                             'birth_day' => $DDay,
                             'birth_month' => $DMonth,
                             'birth_year' => $DYear,
+                            'address' => $this->input->post('address', FILTER_SANITIZE_STRING),
+                            'w_day' => $WDay,
+                            'w_month' => $WMonth,
+                            'w_year' => $WYear,
                             'password' => $hashed_pass
                         ];
                         // check if code is in db

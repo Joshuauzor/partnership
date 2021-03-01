@@ -72,7 +72,7 @@ function email_configuration(){
             $code = $receiver_code;
             $subject = 'Account Activation';
             $message = '<div style="line-height: 1.5;">
-            Dear '.$this->input->post('name', FILTER_SANITIZE_STRING).',<br>A password request link has been sent to you, if this activity was not done by you please contact the admin to secure your account.<br>
+            Dear '.$name.',<br>A password request link has been sent to you, if this activity was not done by you please contact the admin to secure your account.<br>
                 <a href="'.base_url().'user/auth/resetPass/'.$uniid.'" target="_blank">Click here to Reset Your Password</a> <a href="'.base_url().'user/auth/resetPass/'.$uniid.'" target="_blank"><button class="mt-1 btn btn-primary btn-lg" style="background-color: rgb(105, 105, 233); color: aliceblue; border-radius: 1em; border-width: 0;">Reset Password</button>
                 </a>
                 <div>Your Partnership ID is: '.$code.'</div>
